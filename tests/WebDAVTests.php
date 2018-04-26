@@ -3,12 +3,13 @@
 use League\Flysystem\Config;
 use League\Flysystem\Filesystem;
 use League\Flysystem\WebDAV\WebDAVAdapter;
+use \Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class WebDAVTests extends PHPUnit_Framework_TestCase
+class WebDAVTests extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
     protected function getClient()
     {
-        return Mockery::mock('Sabre\DAV\Client');
+        return Mockery::mock('\Sabre\DAV\Client');
     }
 
     public function testHas()
@@ -418,5 +419,31 @@ class WebDAVTests extends PHPUnit_Framework_TestCase
         $adapter = new WebDAVAdapter($clientMock, 'prefix', false);
         $result = $adapter->copy('file.txt', 'newFile.txt');
         $this->assertTrue($result);
+    }
+
+    public function testGetUrl()
+    {
+        /** @var Sabre\DAV\Client|Mockery\Mock $clientMock */
+        $clientMock = $this->getClient();
+
+        $url = 'http://webdav.local/prefix/newFile.txt';
+        $clientMock->shouldReceive('getAbsoluteUrl')->andReturn($url);
+
+        $adapter = new WebDAVAdapter($clientMock, 'prefix');
+        $result = $adapter->getUrl('newFile.txt');
+        $this->assertEquals($url, $result);
+    }
+
+    public function testGetUrlWithCustomPrefix()
+    {
+        /** @var Sabre\DAV\Client|Mockery\Mock $clientMock */
+        $clientMock = $this->getClient();
+
+        $clientMock->shouldReceive('getAbsoluteUrl')->andReturn('http://webdav.local/prefix/newFile.txt');
+
+        $adapter = new WebDAVAdapter($clientMock, 'prefix');
+        $adapter->setUrlPrefix('https://cdn.local');
+        $result = $adapter->getUrl('newFile.txt');
+        $this->assertEquals('https://cdn.local/newFile.txt', $result);
     }
 }

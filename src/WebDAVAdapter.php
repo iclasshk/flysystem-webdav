@@ -51,6 +51,11 @@ class WebDAVAdapter extends AbstractAdapter
     protected $useStreamedCopy = true;
 
     /**
+     * @var string|null;
+     */
+    private $urlPrefix = null;
+
+    /**
      * Constructor.
      *
      * @param Client $client
@@ -403,5 +408,41 @@ class WebDAVAdapter extends AbstractAdapter
     private function isDirectory(array $object)
     {
         return isset($object['{DAV:}iscollection']) && $object['{DAV:}iscollection'] === '1';
+    }
+
+    /**
+     * Get the URL for the file at the given path.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function getUrl($path)
+    {
+        $prefix = $this->getUrlPrefix();
+        return $prefix !== null
+            ? rtrim($prefix, '/') . '/' . ltrim($path, '/')
+            : $this->client->getAbsoluteUrl($path);
+    }
+
+    /**
+     * Get the custom URL prefix for URL generation
+     *
+     * @return string|null
+     */
+    public function getUrlPrefix()
+    {
+        return $this->urlPrefix;
+    }
+
+    /**
+     * Set the custom URL prefix for URL generation.
+     *
+     * If the prefix is not set, the baseUri of DAV client is used.
+     *
+     * @param string|null $prefix
+     */
+    public function setUrlPrefix($prefix)
+    {
+        $this->urlPrefix = $prefix;
     }
 }
