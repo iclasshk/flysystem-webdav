@@ -5,7 +5,7 @@ namespace League\Flysystem\WebDAV;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Adapter\Polyfill\StreamedCopyTrait;
-use League\Flysystem\Adapter\Polyfill\StreamedReadingTrait;
+use League\Flysystem\Adapter\Polyfill\StreamedTrait;
 use League\Flysystem\Config;
 use League\Flysystem\Util;
 use LogicException;
@@ -16,7 +16,7 @@ use Sabre\HTTP\HttpException;
 
 class WebDAVAdapter extends AbstractAdapter
 {
-    use StreamedReadingTrait;
+    use StreamedTrait;
     use StreamedCopyTrait {
         StreamedCopyTrait::copy as streamedCopy;
     }
@@ -169,25 +169,9 @@ class WebDAVAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function writeStream($path, $resource, Config $config)
-    {
-        return $this->write($path, $resource, $config);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function update($path, $contents, Config $config)
     {
         return $this->write($path, $contents, $config);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function updateStream($path, $resource, Config $config)
-    {
-        return $this->update($path, $resource, $config);
     }
 
     /**
